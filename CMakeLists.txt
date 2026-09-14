@@ -6,3 +6,5 @@ set(CMAKE_CXX_STANDARD 23)
 add_executable(mephi_lab_smrt_ptr main.cpp
         smart_ptr.h
 )
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address,undefined -g")
