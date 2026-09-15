@@ -33,7 +33,7 @@ public:
         counter = nullptr;
     }
 
-    const smart_ptr<T>&  operator=(smart_ptr<T>& other) {
+    smart_ptr<T>&  operator=(smart_ptr<T>& other) {
         if (this != &other) {
             this->~smart_ptr();
             this->ptr = other.ptr;
@@ -41,6 +41,15 @@ public:
             if (counter) ++*counter;
 
         }
+        return *this;
+    }
+
+    template <typename U>
+    smart_ptr<T>& operator=(smart_ptr<U>& other) {
+        this->~smart_ptr();
+        ptr = other.get();
+        counter = other.get_counter();
+        if (counter) ++*counter;
         return *this;
     }
 
