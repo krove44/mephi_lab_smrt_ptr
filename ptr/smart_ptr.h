@@ -9,7 +9,14 @@ private:
 public:
     explicit smart_ptr() : ptr(nullptr), counter(nullptr) {}
 
-    explicit smart_ptr(T* ptr) : ptr(ptr), counter(new size_t(1)) {}
+    smart_ptr(T* ptr) : ptr(ptr), counter(new size_t(1)) {}
+
+    template <typename U>
+    smart_ptr(const smart_ptr<U>& other) : ptr(other.get()), counter(other.get_counter()) {
+        if (counter) {
+            ++*counter;
+        }
+    }
 
     smart_ptr(smart_ptr<T>& other) : ptr(other.ptr), counter(other.counter) {
         if (counter) {
@@ -49,9 +56,21 @@ public:
         return ptr;
     }
 
+    T* get() const {
+        return ptr;
+    }
+
+    size_t* get_counter() const {
+        return counter;
+    }
+
+    size_t use_count() const {
+        return counter ? *counter : 0;
+    }
+
     friend std::ostream& operator<<(std::ostream& os, const smart_ptr<T>& sp) {
         os << sp.ptr;
         return os;
     }
-    
+
 };

@@ -1,5 +1,5 @@
 #include <iostream>
-#include "smart_ptr.h"
+#include "ptr/smart_ptr.h"
 
 int main() {
     smart_ptr<int> ptr(new int(10));
