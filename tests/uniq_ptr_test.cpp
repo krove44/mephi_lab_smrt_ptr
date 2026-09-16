@@ -32,6 +32,7 @@ protected:
 
 //Затраты по памяти
 TEST_F(SmartPointerBenchmark, MemoryOverhead) {
+    std::cout << "-------------     Memory Test     -------------\n";
     EXPECT_EQ(sizeof(uniq_ptr<Payload>), sizeof(Payload*));
     EXPECT_EQ(sizeof(std::unique_ptr<Payload>), sizeof(Payload*));
     std::cout << "[ Memory ] uniq_ptr size: " << sizeof(uniq_ptr<Payload>) << " bytes\n";
@@ -41,6 +42,7 @@ TEST_F(SmartPointerBenchmark, MemoryOverhead) {
 
 //тестирование на малом числе объектов
 TEST_F(SmartPointerBenchmark, SmallScaleAllocations) {
+    std::cout << "-------------     Small Object Test     -------------\n";
     const size_t COUNT = 10'000;
 
     RunBenchmark("Pointers (Small)", COUNT, [](size_t count) {
@@ -65,6 +67,7 @@ TEST_F(SmartPointerBenchmark, SmallScaleAllocations) {
 
 //тестирование на большом числе объектов
 TEST_F(SmartPointerBenchmark, LargeScaleAllocations) {
+    std::cout << "-------------     More Object Test     -------------\n";
     const size_t COUNT = 10'000'000;
 
     RunBenchmark("Pointers (Big)", COUNT, [](size_t count) {
