@@ -17,7 +17,6 @@ FetchContent_MakeAvailable(googletest)
 
 add_executable(mephi_lab_smrt_ptr
         main.cpp
-        ptr/smart_ptr.h
         ptr/uniq_ptr.h
         ptr/shared_ptr.h
 )
@@ -25,8 +24,7 @@ add_executable(mephi_lab_smrt_ptr
 
 enable_testing()
 add_executable(run_tests
-        tests/tests.cpp
-        ptr/smart_ptr.h
+        tests/shared_ptr_test.cpp
         tests/uniq_ptr_test.cpp
 )
 target_link_libraries(run_tests PRIVATE GTest::gtest GTest::gtest_main)

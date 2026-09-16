@@ -1,11 +1,10 @@
 #pragma once
-#include "uniq_ptr.h"
 #include <cstddef>
 
 template <typename T>
 class shared_ptr {
 private:
-    uniq_ptr<T>* ptr;
+    T* ptr;
     size_t* counter;
     void clear() {
         if (counter && --*counter == 0) {
@@ -14,11 +13,18 @@ private:
         }
     }
 public:
-    shared_ptr() : ptr(nullptr), counter(nullptr) {}
-    shared_ptr(uniq_ptr<T>* ptr) : ptr(ptr), counter(new size_t(1)) {}
-    shared_ptr(const shared_ptr& other) : ptr(other.ptr), counter(other.counter) {
+    explicit shared_ptr() : ptr(nullptr), counter(nullptr) {}
+    shared_ptr(T* ptr) : ptr(ptr), counter(new size_t(1)) {}
+
+    template <typename U>
+    shared_ptr(const shared_ptr<U>& other) : ptr(other.get()), counter(other.get_counter()) {
         if (counter) ++*counter;
     }
+
+    shared_ptr(const shared_ptr<T>& other) : ptr(other.ptr), counter(other.counter) {
+        if (counter) ++*counter;
+    }
+
     ~shared_ptr() {
         clear();
         ptr = nullptr;
@@ -26,19 +32,54 @@ public:
     }
 
     shared_ptr<T>&  operator=(const shared_ptr<T>& other) {
-        if (this != &other || counter == other.counter) {
+        if (this != &other) {
             clear();
-            ptr = other.ptr;
-            counter = other.counter;
+            this->ptr = other.ptr;
+            this->counter = other.counter;
+            if (counter) ++*counter;
+
+        }
+        return *this;
+    }
+
+    template <typename U>
+    shared_ptr<T>& operator=(const shared_ptr<U>& other) {
+        if (this != &other) {
+            clear();
+            ptr = other.get();
+            counter = other.get_counter();
             if (counter) ++*counter;
         }
         return *this;
     }
 
-    T& operator*() {return *(*ptr);}
-    uniq_ptr<T> operator->() {return *ptr;}
-    uniq_ptr<T> get() const {return *ptr;}
-    size_t* get_counter() const {return counter;}
-    size_t use_count() const {return counter ? *counter : 0;}
+    T& operator*() {
+        return *ptr;
+    }
+
+    const T& operator*() const {
+        return *ptr;
+    }
+
+    T* operator->() {
+        return ptr;
+    }
+
+    T* get() const {
+        return ptr;
+    }
+
+    size_t* get_counter() const {
+        return counter;
+    }
+
+    size_t use_count() const {
+        return counter ? *counter : 0;
+    }
+
+    friend std::ostream& operator<<(std::ostream& os, const shared_ptr<T>& sp) {
+        os << sp.ptr;
+        return os;
+    }
 
 };

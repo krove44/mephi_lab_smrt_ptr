@@ -1,5 +1,5 @@
 #include <iostream>
-#include "ptr/smart_ptr.h"
+#include "ptr/shared_ptr.h"
 #include "ptr/uniq_ptr.h"
 
 int main() {
