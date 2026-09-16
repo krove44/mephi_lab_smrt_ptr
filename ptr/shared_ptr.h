@@ -15,12 +15,6 @@ private:
 public:
     explicit shared_ptr() : ptr(nullptr), counter(nullptr) {}
     shared_ptr(T* ptr) : ptr(ptr), counter(new size_t(1)) {}
-
-    template <typename U>
-    shared_ptr(const shared_ptr<U>& other) : ptr(other.get()), counter(other.get_counter()) {
-        if (counter) ++*counter;
-    }
-
     shared_ptr(const shared_ptr<T>& other) : ptr(other.ptr), counter(other.counter) {
         if (counter) ++*counter;
     }
@@ -38,17 +32,6 @@ public:
             this->counter = other.counter;
             if (counter) ++*counter;
 
-        }
-        return *this;
-    }
-
-    template <typename U>
-    shared_ptr<T>& operator=(const shared_ptr<U>& other) {
-        if (this != &other) {
-            clear();
-            ptr = other.get();
-            counter = other.get_counter();
-            if (counter) ++*counter;
         }
         return *this;
     }
