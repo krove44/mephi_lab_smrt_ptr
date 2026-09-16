@@ -6,36 +6,34 @@ class smart_ptr {
 private:
     T* ptr;
     size_t* counter;
-public:
-    explicit smart_ptr() : ptr(nullptr), counter(nullptr) {}
-
-    smart_ptr(T* ptr) : ptr(ptr), counter(new size_t(1)) {}
-
-    template <typename U>
-    smart_ptr(const smart_ptr<U>& other) : ptr(other.get()), counter(other.get_counter()) {
-        if (counter) {
-            ++*counter;
-        }
-    }
-
-    smart_ptr(const smart_ptr<T>& other) : ptr(other.ptr), counter(other.counter) {
-        if (counter) {
-            ++*counter;
-        }
-    }
-
-    ~smart_ptr() {
+    void clear() {
         if (counter && --*counter == 0) {
             delete ptr;
             delete counter;
         }
+    }
+public:
+    explicit smart_ptr() : ptr(nullptr), counter(nullptr) {}
+    smart_ptr(T* ptr) : ptr(ptr), counter(new size_t(1)) {}
+
+    template <typename U>
+    smart_ptr(const smart_ptr<U>& other) : ptr(other.get()), counter(other.get_counter()) {
+        if (counter) ++*counter;
+    }
+
+    smart_ptr(const smart_ptr<T>& other) : ptr(other.ptr), counter(other.counter) {
+        if (counter) ++*counter;
+    }
+
+    ~smart_ptr() {
+        clear();
         ptr = nullptr;
         counter = nullptr;
     }
 
     smart_ptr<T>&  operator=(const smart_ptr<T>& other) {
         if (this != &other) {
-            this->~smart_ptr();
+            clear();
             this->ptr = other.ptr;
             this->counter = other.counter;
             if (counter) ++*counter;
@@ -46,10 +44,12 @@ public:
 
     template <typename U>
     smart_ptr<T>& operator=(const smart_ptr<U>& other) {
-        this->~smart_ptr();
-        ptr = other.get();
-        counter = other.get_counter();
-        if (counter) ++*counter;
+        if (this != &other) {
+            clear();
+            ptr = other.get();
+            counter = other.get_counter();
+            if (counter) ++*counter;
+        }
         return *this;
     }
 

@@ -17,6 +17,7 @@ public:
 
     ~uniq_ptr() {
         delete ptr_;
+        ptr_ = nullptr;
     }
 
     uniq_ptr& operator=(uniq_ptr&& other) noexcept {
@@ -28,14 +29,8 @@ public:
         return *this;
     }
 
-    T& operator*() const {
-        return *ptr_;
-    }
-    T* operator->() const {
-        return ptr_;
-    }
-    T* get() const {
-        return ptr_;
-    }
+    T& operator*() const {return *ptr_;}
+    T* operator->() const {return ptr_;}
+    T* get() const {return ptr_;}
 
 };

@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "ptr/smart_ptr.h"
+#include "../ptr/smart_ptr.h"
 struct Base {
     virtual int value() const { return 1; }
     virtual ~Base() = default;
