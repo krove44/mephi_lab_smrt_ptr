@@ -18,6 +18,7 @@ FetchContent_MakeAvailable(googletest)
 add_executable(mephi_lab_smrt_ptr
         main.cpp
         ptr/smart_ptr.h
+        ptr/uniq_ptr.h
 )
 
 

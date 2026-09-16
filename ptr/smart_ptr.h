@@ -18,7 +18,7 @@ public:
         }
     }
 
-    smart_ptr(smart_ptr<T>& other) : ptr(other.ptr), counter(other.counter) {
+    smart_ptr(const smart_ptr<T>& other) : ptr(other.ptr), counter(other.counter) {
         if (counter) {
             ++*counter;
         }
@@ -33,7 +33,7 @@ public:
         counter = nullptr;
     }
 
-    smart_ptr<T>&  operator=(smart_ptr<T>& other) {
+    smart_ptr<T>&  operator=(const smart_ptr<T>& other) {
         if (this != &other) {
             this->~smart_ptr();
             this->ptr = other.ptr;
@@ -45,7 +45,7 @@ public:
     }
 
     template <typename U>
-    smart_ptr<T>& operator=(smart_ptr<U>& other) {
+    smart_ptr<T>& operator=(const smart_ptr<U>& other) {
         this->~smart_ptr();
         ptr = other.get();
         counter = other.get_counter();

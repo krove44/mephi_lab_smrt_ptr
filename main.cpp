@@ -1,9 +1,10 @@
 #include <iostream>
 #include "ptr/smart_ptr.h"
+#include "ptr/uniq_ptr.h"
 
 int main() {
-    smart_ptr<int> ptr(new int(10));
-    smart_ptr<int> ptr2 = ptr;
-    std::cout << *ptr2 << std::endl;
+    uniq_ptr<int> ptr(new int(42));
+    uniq_ptr<int> ptr2(std::move(ptr));
+    std::cout << *ptr2.get() << std::endl;
     return 0;
 }
