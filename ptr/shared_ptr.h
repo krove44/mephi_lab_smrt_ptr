@@ -9,7 +9,7 @@ public:
     explicit shared_ptr() : block_() {}
     shared_ptr(T* ptr) : block_(new control_block<T>(ptr)) {}
     shared_ptr(const shared_ptr<T>& other) : block_(other.block_) {
-        block_->operator++();
+        if (block_) block_->operator++();
     }
     shared_ptr(shared_ptr<T>&& other) : block_(other.block_) {
         other.block_ = nullptr;
@@ -52,49 +52,46 @@ public:
 };
 
 
-// template <typename T>
-// class shared_ptr<T[]> {
-// private:
-//     T* ptr;
-//     size_t* counter;
-//     void clear() {
-//         if (counter && --*counter == 0) {
-//             delete[] ptr;
-//             delete counter;
-//         }
-//     }
-// public:
-//     explicit shared_ptr() : ptr(nullptr), counter(nullptr) {}
-//     shared_ptr(T* ptr) : ptr(ptr), counter(new size_t(1)) {}
-//     shared_ptr(const shared_ptr<T[]>& other) : ptr(other.ptr), counter(other.counter) {
-//         if (counter) ++*counter;
-//     }
-//
-//     ~shared_ptr() {
-//         clear();
-//         ptr = nullptr;
-//         counter = nullptr;
-//     }
-//
-//     shared_ptr<T[]>& operator=(const shared_ptr<T[]>& other) {
-//         if (this != &other) {
-//             clear();
-//             this->ptr = other.ptr;
-//             this->counter = other.counter;
-//             if (counter) ++*counter;
-//         }
-//         return *this;
-//     }
-//
-//     T& operator[](size_t i) { return ptr[i]; }
-//     const T& operator[](size_t i) const { return ptr[i]; }
-//
-//     T* get() const { return ptr; }
-//     size_t* get_counter() const { return counter; }
-//     size_t use_count() const { return counter ? *counter : 0; }
-//
-//     friend std::ostream& operator<<(std::ostream& os, const shared_ptr<T[]>& sp) {
-//         os << sp.ptr;
-//         return os;
-//     }
-// };
+template <typename T>
+class shared_ptr<T[]> {
+private:
+    control_block<T[]>* block_;
+
+    void release() {
+        if (block_ && block_->operator--()) delete block_;
+        block_ = nullptr;
+    }
+public:
+    shared_ptr() : block_(nullptr) {}
+    explicit shared_ptr(T* ptr) : block_(ptr ? new control_block<T[]>(ptr) : nullptr) {}
+    shared_ptr(const shared_ptr<T[]>& other) : block_(other.block_) {
+        if (block_) block_->operator++();
+    }
+    shared_ptr(shared_ptr<T[]>&& other) noexcept : block_(other.block_) {
+        other.block_ = nullptr;
+    }
+
+    ~shared_ptr() { release(); }
+
+    shared_ptr<T[]>& operator=(const shared_ptr<T[]>& other) {
+        if (this != &other) {
+            release();
+            block_ = other.block_;
+            if (block_) block_->operator++();
+        }
+        return *this;
+    }
+
+    shared_ptr<T[]>& operator=(shared_ptr<T[]>&& other) noexcept {
+        if (this != &other) {
+            release();
+            block_ = other.block_;
+            other.block_ = nullptr;
+        }
+        return *this;
+    }
+
+    T& operator[](size_t i) { return (*block_)[i]; }
+    T* get() const { return block_ ? block_->get() : nullptr; }
+    size_t use_count() const { return block_ ? block_->use_count() : 0; }
+};

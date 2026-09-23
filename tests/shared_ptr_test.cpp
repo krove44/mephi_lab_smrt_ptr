@@ -120,5 +120,83 @@ TEST_F(SharedPointerBenchmark, UseCountCorrectness) {
     }
 
     EXPECT_EQ(a.use_count(), 1);
+    std::cout << std::endl;
 }
+
+class SharedPointerArrayBenchmark : public ::testing::Test {
+protected:
+    static constexpr size_t ARRAY_SIZE = 4;
+
+    template <typename Func>
+    void RunBenchmark(const std::string& name, size_t iterations, Func&& func) {
+        auto start = std::chrono::high_resolution_clock::now();
+
+        func(iterations);
+
+        auto end = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double, std::milli> ms = end - start;
+
+        std::cout << "[ Bench ] " << name << " | Arrays: " << iterations
+                  << " | Time: " << ms.count() << " ms\n";
+    }
+};
+
+//Затраты по памяти
+TEST_F(SharedPointerArrayBenchmark, MemoryOverhead) {
+    std::cout << "-------------     Memory Test (T[])     -------------\n";
+    std::cout << "[ Memory ] shared_ptr<T[]> size: " << sizeof(shared_ptr<Payload[]>) << " bytes\n";
+    std::cout << "[ Memory ] std::shared_ptr<T[]> size: " << sizeof(std::shared_ptr<Payload[]>) << " bytes\n";
+    std::cout << "[ Memory ] pointer size: " << sizeof(Payload*) << " bytes\n";
+}
+
+//тестирование на малом числе массивов
+TEST_F(SharedPointerArrayBenchmark, SmallScaleAllocations) {
+    std::cout << "-------------     Small Array Test     -------------\n";
+    const size_t COUNT = 10'000;
+
+    RunBenchmark("Pointers new[] (Small)", COUNT, [](size_t count) {
+        std::vector<Payload*> vec;
+        vec.reserve(count);
+        for (size_t i = 0; i < count; ++i) vec.push_back(new Payload[ARRAY_SIZE]);
+        for (auto p : vec) delete[] p;
+    });
+
+    RunBenchmark("std::shared_ptr<T[]> (Small)", COUNT, [](size_t count) {
+        std::vector<std::shared_ptr<Payload[]>> vec;
+        vec.reserve(count);
+        for (size_t i = 0; i < count; ++i) vec.push_back(std::make_shared<Payload[]>(ARRAY_SIZE));
+    });
+
+    RunBenchmark("My shared_ptr<T[]> (Small)", COUNT, [](size_t count) {
+        std::vector<shared_ptr<Payload[]>> vec;
+        vec.reserve(count);
+        for (size_t i = 0; i < count; ++i) vec.push_back(shared_ptr<Payload[]>(new Payload[ARRAY_SIZE]));
+    });
+}
+
+TEST_F(SharedPointerArrayBenchmark, LargeScaleAllocations) {
+    std::cout << "-------------     More Array Test     -------------\n";
+    const size_t COUNT = 1'000'000;
+
+    RunBenchmark("Pointers new[] (Big)", COUNT, [](size_t count) {
+        std::vector<Payload*> vec;
+        vec.reserve(count);
+        for (size_t i = 0; i < count; ++i) vec.push_back(new Payload[ARRAY_SIZE]);
+        for (auto p : vec) delete[] p;
+    });
+
+    RunBenchmark("std::shared_ptr<T[]> (Big)", COUNT, [](size_t count) {
+        std::vector<std::shared_ptr<Payload[]>> vec;
+        vec.reserve(count);
+        for (size_t i = 0; i < count; ++i) vec.push_back(std::make_shared<Payload[]>(ARRAY_SIZE));
+    });
+
+    RunBenchmark("My shared_ptr<T[]> (Big)", COUNT, [](size_t count) {
+        std::vector<shared_ptr<Payload[]>> vec;
+        vec.reserve(count);
+        for (size_t i = 0; i < count; ++i) vec.push_back(shared_ptr<Payload[]>(new Payload[ARRAY_SIZE]));
+    });
+    std::cout << std::endl;
+}
+
 
