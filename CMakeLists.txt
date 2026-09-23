@@ -19,6 +19,7 @@ add_executable(mephi_lab_smrt_ptr
         main.cpp
         ptr/uniq_ptr.h
         ptr/shared_ptr.h
+        ptr/control_block.h
 )
 
 
