@@ -25,6 +25,13 @@ int main() {
 
     shared_ptr<Second> p(new Second(42));
     shared_ptr<First> p1 = p;
+    std::cout << p1.get() << std::endl;
+    std::cout << p.get() << std::endl;
+    std::cout << p.use_count() << std::endl;
+    shared_ptr<First> p3 = std::move(p);
+    std::cout << p3.get() << std::endl;
+    std::cout << p.get() << std::endl;
+    std::cout << p3.use_count() << std::endl;
 
 
     return 0;

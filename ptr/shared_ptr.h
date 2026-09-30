@@ -1,97 +1,100 @@
 #pragma once
 #include "control_block.h"
+#include <type_traits>
+
+template <class X>
+struct DefaultDelete {
+    void operator()(X* p) const {
+        delete p;
+    }
+};
 
 template <typename T>
 class shared_ptr {
 private:
-    control_block<T>* block_;
+    T* ptr_;
+    base_control_block* block_;
+    template <class U> friend class shared_ptr;
 public:
-    explicit shared_ptr() : block_() {}
-    shared_ptr(T* ptr) : block_(new control_block<T>(ptr)) {}
-    shared_ptr(const shared_ptr<T>& other) : block_(other.block_) {
-        if (block_) block_->operator++();
+    shared_ptr() : ptr_(nullptr), block_(nullptr) {}
+
+    template <typename X, typename = std::enable_if_t<std::is_convertible_v<X*, T*>>>
+    explicit shared_ptr(X* ptr) : ptr_(ptr), block_(new regular_control_block<X, DefaultDelete<X>>(ptr, DefaultDelete<X>{})){};
+
+    template <typename X, typename Deleter, typename = std::enable_if_t<std::is_convertible_v<X*, T*>>>
+    shared_ptr(X* ptr, Deleter del) : ptr_(ptr), block_(new regular_control_block<X, Deleter>(ptr, del)) {}
+
+    template <typename U, typename = std::enable_if_t<std::is_convertible_v<U*, T*>>>
+    shared_ptr(const shared_ptr<U>& other) : ptr_(other.ptr_), block_(other.block_) {
+        if (block_) {
+            block_->add_strong();
+        };
     }
-    shared_ptr(shared_ptr<T>&& other) : block_(other.block_) {
+    shared_ptr(const shared_ptr<T>& other) : ptr_(other.ptr_), block_(other.block_){
+        if (block_) {
+            block_->add_strong();
+        }
+    }
+
+    template <typename U, typename = std::enable_if_t<std::is_convertible_v<U*, T*>>>
+    shared_ptr(shared_ptr<U>&& other) : ptr_(other.ptr_), block_(other.block_) {
+        other.ptr_ = nullptr;
         other.block_ = nullptr;
+    }
+    shared_ptr(shared_ptr<T>&& other) : ptr_(other.ptr_), block_(other.block_) {
+        other.ptr_ = nullptr;
+        other.block_ = nullptr;
+    }
+
+    template <typename U, typename = std::enable_if_t<std::is_convertible_v<U*, T*>>>
+    shared_ptr& operator=(const shared_ptr<U>& other) {
+        return *this = shared_ptr<T>(other);
+    };
+    shared_ptr<T>& operator=(const shared_ptr<T>& other) {
+        if (&other == this) return *this;
+        ptr_ = other.ptr_;
+        base_control_block* b = other.block_;
+        if (b) b->add_strong();
+        if (block_) block_->release_strong();
+        block_ = b;
+        return *this;
+    }
+
+    template <typename U, typename = std::enable_if_t<std::is_convertible_v<U*, T*>>>
+    shared_ptr& operator=(shared_ptr<U>&& other) {
+        return *this = shared_ptr<T>(std::move(other));
+    };
+    shared_ptr<T>& operator=(shared_ptr<T>&& other) {
+        if (&other == this) return *this;
+        ptr_ = other.ptr_;
+        base_control_block* b = other.block_;
+        other.ptr_ = nullptr;
+        other.block_ = nullptr;
+        if (block_) block_->release_strong();
+        block_ = b;
+        return *this;
     }
 
     ~shared_ptr() {
-        if (block_ && block_->operator--()) delete block_;
+        if (block_) block_->release_strong();
     }
 
-    shared_ptr<T>&  operator=(const shared_ptr<T>& other) {
-        if (this != &other) {
-            delete block_;
-            block_ = other.block_;
-            block_->operator++();
+    T& operator*() const {
+        return *ptr_;
+    }
+
+    std::size_t use_count() const {
+        if (block_) {
+            return block_->use_count();
         }
-        return *this;
-    }
-
-    T& operator*() {
-        return block_->operator*();
-    }
-
-    T* operator->() {
-        return block_->operator->();
-    }
+        return 0;
+    };
 
     T* get() const {
-        return block_->get();
+        return ptr_;
     }
 
-    size_t use_count() const {
-        return block_->use_count();
+    T* operator->() const{
+        return ptr_;
     }
-
-    friend std::ostream& operator<<(std::ostream& os, const shared_ptr<T>& sp) {
-        os << sp.block_->operator*();
-        return os;
-    }
-
-};
-
-
-template <typename T>
-class shared_ptr<T[]> {
-private:
-    control_block<T[]>* block_;
-
-    void release() {
-        if (block_ && block_->operator--()) delete block_;
-        block_ = nullptr;
-    }
-public:
-    shared_ptr() : block_(nullptr) {}
-    explicit shared_ptr(T* ptr) : block_(ptr ? new control_block<T[]>(ptr) : nullptr) {}
-    shared_ptr(const shared_ptr<T[]>& other) : block_(other.block_) {
-        if (block_) block_->operator++();
-    }
-    shared_ptr(shared_ptr<T[]>&& other) : block_(other.block_) {
-        other.block_ = nullptr;
-    }
-
-    ~shared_ptr() { release(); }
-
-    shared_ptr<T[]>& operator=(const shared_ptr<T[]>& other) {
-        if (this != &other) {
-            release();
-            block_ = other.block_;
-            if (block_) block_->operator++();
-        }
-        return *this;
-    }
-
-    shared_ptr<T[]>& operator=(shared_ptr<T[]>&& other) {
-        if (this != &other) {
-            release();
-            block_ = other.block_;
-            other.block_ = nullptr;
-        }
-        return *this;
-    }
-
-    T& operator[](size_t i) { return (*block_)[i]; }
-    T* get() const { return block_ ? block_->get() : nullptr; }
-    size_t use_count() const { return block_ ? block_->use_count() : 0; }
 };
