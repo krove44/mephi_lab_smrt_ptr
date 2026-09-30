@@ -1,57 +1,58 @@
 #pragma once
 #include <cstddef>
 
+struct base_control_block {
+    size_t strong{1};
+    size_t weak{1};
+    virtual ~base_control_block() = default;
+    virtual void destroy_obj() = 0;
+    virtual void destroy_block()  = 0;
 
-template <typename T>
-class control_block {
-private:
-    T* ptr;
-    size_t counter;
-public:
-    control_block() : ptr(nullptr), counter(0) {}
-    control_block(T* ptr, size_t counter = 1) : ptr(ptr), counter(counter) {}
-    control_block(const control_block&) = delete;
-    control_block& operator=(const control_block&) = delete;
-    ~control_block() {
-        if (ptr) delete ptr;
-        ptr = nullptr;
-        counter = 0;
-    };
-    void operator++() {
-        counter++;
+    void add_strong() {
+        ++strong;
     }
-    bool operator--() {
-        return --counter == 0;
+
+    void add_weak() {
+        ++weak;
     }
-    T& operator*() {return *ptr;}
-    T* get() {return ptr;};
-    T* operator->() {return ptr;}
-    size_t use_count() {return counter;}
+
+    void release_strong() {
+        strong--;
+        if (strong == 0) {
+            destroy_obj();
+            release_weak();
+        }
+    }
+    void release_weak() {
+        weak--;
+        if (weak == 0) {
+            destroy_block();
+        }
+    }
+    bool try_add_strong() {
+        if (strong == 0) {
+            return false;
+        }
+        ++strong;
+        return true;
+    }
+
+    std::size_t use_count() const {
+        return strong;
+    }
 
 };
 
-template <typename T>
-class control_block<T[]> {
-private:
-    T* ptr;
-    size_t counter;
-public:
-    control_block() : ptr(nullptr), counter(0) {}
-    control_block(T* ptr, size_t counter = 1) : ptr(ptr), counter(counter) {}
-    control_block(const control_block&) = delete;
-    control_block& operator=(const control_block&) = delete;
-    ~control_block() {
-        delete[] ptr;
-        ptr = nullptr;
-        counter = 0;
+
+template<typename U, typename Deleter>
+struct regular_control_block : public base_control_block {
+    U* ptr;
+    Deleter deleter;
+    regular_control_block(U* ptr, Deleter del) : ptr(ptr), deleter(del) {}
+    void destroy_obj() override {
+        deleter(ptr);
     }
-    void operator++() {
-        ++counter;
+    void destroy_block() override {
+        delete this;
     }
-    bool operator--() {
-        return --counter == 0;
-    }
-    T& operator[](size_t i) { return ptr[i]; }
-    T* get() const { return ptr; }
-    size_t use_count() const { return counter; }
 };

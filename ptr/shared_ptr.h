@@ -67,7 +67,7 @@ public:
     shared_ptr(const shared_ptr<T[]>& other) : block_(other.block_) {
         if (block_) block_->operator++();
     }
-    shared_ptr(shared_ptr<T[]>&& other) noexcept : block_(other.block_) {
+    shared_ptr(shared_ptr<T[]>&& other) : block_(other.block_) {
         other.block_ = nullptr;
     }
 
@@ -82,7 +82,7 @@ public:
         return *this;
     }
 
-    shared_ptr<T[]>& operator=(shared_ptr<T[]>&& other) noexcept {
+    shared_ptr<T[]>& operator=(shared_ptr<T[]>&& other) {
         if (this != &other) {
             release();
             block_ = other.block_;

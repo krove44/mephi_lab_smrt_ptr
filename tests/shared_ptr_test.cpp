@@ -4,8 +4,6 @@
 #include <vector>
 #include <iostream>
 #include "../ptr/shared_ptr.h"
-//control block
-//move семантика
 struct Payload {
     uint64_t data[4];
     Payload() : data{1, 2, 3, 4} {}
