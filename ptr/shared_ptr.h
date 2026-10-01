@@ -1,7 +1,7 @@
 #pragma once
 #include "control_block.h"
 #include <type_traits>
-
+#include <utility>
 template <class X>
 struct DefaultDelete {
     void operator()(X* p) const {
@@ -9,17 +9,21 @@ struct DefaultDelete {
     }
 };
 
+template <typename T> class weak_ptr;
+
 template <typename T>
 class shared_ptr {
 private:
     T* ptr_;
     base_control_block* block_;
     template <class U> friend class shared_ptr;
+    template <class U> friend class weak_ptr;
+    shared_ptr(T* ptr, base_control_block* b) : ptr_(ptr), block_(b) {};
 public:
     shared_ptr() : ptr_(nullptr), block_(nullptr) {}
 
     template <typename X, typename = std::enable_if_t<std::is_convertible_v<X*, T*>>>
-    explicit shared_ptr(X* ptr) : ptr_(ptr), block_(new regular_control_block<X, DefaultDelete<X>>(ptr, DefaultDelete<X>{})){};
+    shared_ptr(X* ptr) : ptr_(ptr), block_(new regular_control_block<X, DefaultDelete<X>>(ptr, DefaultDelete<X>{})){};
 
     template <typename X, typename Deleter, typename = std::enable_if_t<std::is_convertible_v<X*, T*>>>
     shared_ptr(X* ptr, Deleter del) : ptr_(ptr), block_(new regular_control_block<X, Deleter>(ptr, del)) {}
@@ -89,6 +93,13 @@ public:
         }
         return 0;
     };
+
+    std::size_t use_count_weak() const {
+        if (block_) {
+            return block_->use_count_weak();
+        }
+        return 0;
+    }
 
     T* get() const {
         return ptr_;

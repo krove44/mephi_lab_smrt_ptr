@@ -41,6 +41,10 @@ struct base_control_block {
         return strong;
     }
 
+    std::size_t use_count_weak() const {
+        return weak;
+    }
+
 };
 
 

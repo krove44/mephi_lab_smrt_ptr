@@ -1,7 +1,9 @@
 #include <iostream>
+#include <memory>
+
 #include "ptr/shared_ptr.h"
 #include "ptr/uniq_ptr.h"
-
+#include "ptr/weak_ptr.h"
 class First {
     int x;
 public:
@@ -23,15 +25,31 @@ int main() {
     // auto s = "hello world";
     // int* x = new int(5);
 
-    shared_ptr<Second> p(new Second(42));
-    shared_ptr<First> p1 = p;
-    std::cout << p1.get() << std::endl;
-    std::cout << p.get() << std::endl;
-    std::cout << p.use_count() << std::endl;
-    shared_ptr<First> p3 = std::move(p);
-    std::cout << p3.get() << std::endl;
-    std::cout << p.get() << std::endl;
-    std::cout << p3.use_count() << std::endl;
+    // shared_ptr<Second> p(new Second(42));
+    // shared_ptr<First> p1 = p;
+    // std::cout << p1.get() << std::endl;
+    // std::cout << p.get() << std::endl;
+    // std::cout << p.use_count() << std::endl;
+    // shared_ptr<First> p3 = std::move(p);
+    // std::cout << p3.get() << std::endl;
+    // std::cout << p.get() << std::endl;
+    // std::cout << p3.use_count() << std::endl;
+
+    // shared_ptr<int> p = new int(5);
+    // std::cout << p.use_count() << std::endl;
+    // weak_ptr<int> p1(p);
+    // auto p2 = p1.lock();
+    // std::cout << p1.use_count() << std::endl;
+
+    shared_ptr<Second> p = new Second(5);
+    {
+        std::cout << p.use_count_weak() << '\n';
+        weak_ptr<First> p1(p);
+        std::cout << p.use_count_weak() << '\n';
+    }
+    std::cout << p.use_count_weak() << std::endl;
+
+
 
 
     return 0;
