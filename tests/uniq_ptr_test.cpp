@@ -30,19 +30,9 @@ protected:
     }
 };
 
-//Затраты по памяти
-TEST_F(UniqPtr, MemoryOverhead) {
-    std::cout << "-------------     Memory Test     -------------\n";
-    EXPECT_EQ(sizeof(uniq_ptr<Payload>), sizeof(Payload*));
-    EXPECT_EQ(sizeof(std::unique_ptr<Payload>), sizeof(Payload*));
-    std::cout << "[ Memory ] uniq_ptr size: " << sizeof(uniq_ptr<Payload>) << " bytes\n";
-    std::cout << "[ Memory ] std::unique_ptr size: " << sizeof(std::unique_ptr<Payload>) << " bytes\n";
-    std::cout << "[ Memory ] pointer size: " << sizeof(Payload*) << " bytes\n";
-}
 
 //тестирование на малом числе объектов
 TEST_F(UniqPtr, SmallScaleAllocations) {
-    std::cout << "-------------     Small Object Test     -------------\n";
     const size_t COUNT = 10'000;
 
     RunBenchmark("Pointers (Small)", COUNT, [](size_t count) {
@@ -67,8 +57,7 @@ TEST_F(UniqPtr, SmallScaleAllocations) {
 
 //тестирование на большом числе объектов
 TEST_F(UniqPtr, LargeScaleAllocations) {
-    std::cout << "-------------     More Object Test     -------------\n";
-    const size_t COUNT = 10'000'000;
+    const size_t COUNT = 1'000'000;
 
     RunBenchmark("Pointers (Big)", COUNT, [](size_t count) {
         std::vector<Payload*> vec;

@@ -22,6 +22,8 @@ add_executable(mephi_lab_smrt_ptr
         ptr/shared_ptr.h
         ptr/control_block.h
         ptr/weak_ptr.h
+        ptr/shared_ptr_arr.h
+        ptr/weak_ptr_arr.h
 )
 
 
@@ -35,6 +37,9 @@ add_executable(run_tests
         tests/bench_copy_test.cpp
         tests/uniq_ptr_test.cpp
         tests/bench_large_test.cpp
+        tests/shared_ptr_arr_test.cpp
+        tests/weak_ptr_arr_test.cpp
+        tests/bench_arr_test.cpp
 )
 target_link_libraries(run_tests PRIVATE GTest::gtest GTest::gtest_main)
 
