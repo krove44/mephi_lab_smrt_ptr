@@ -12,9 +12,9 @@ struct Payload {
 };
 
 //данная вещь называется фикстурой, когда я пишу TEST_F срабатывает специальный макрос и
-//генерируется новый скрытый класс, который наследуется от SmartPointerBenchmark
+//генерируется новый скрытый класс, который наследуется от UniqPtr
 //после завершения обьект уничтожается и это гарантирует нам изолированные друг от друга тесты
-class SmartPointerBenchmark : public ::testing::Test {
+class UniqPtr : public ::testing::Test {
 protected:
     template <typename Func>
     void RunBenchmark(const std::string& name, size_t iterations, Func&& func) {
@@ -31,7 +31,7 @@ protected:
 };
 
 //Затраты по памяти
-TEST_F(SmartPointerBenchmark, MemoryOverhead) {
+TEST_F(UniqPtr, MemoryOverhead) {
     std::cout << "-------------     Memory Test     -------------\n";
     EXPECT_EQ(sizeof(uniq_ptr<Payload>), sizeof(Payload*));
     EXPECT_EQ(sizeof(std::unique_ptr<Payload>), sizeof(Payload*));
@@ -41,7 +41,7 @@ TEST_F(SmartPointerBenchmark, MemoryOverhead) {
 }
 
 //тестирование на малом числе объектов
-TEST_F(SmartPointerBenchmark, SmallScaleAllocations) {
+TEST_F(UniqPtr, SmallScaleAllocations) {
     std::cout << "-------------     Small Object Test     -------------\n";
     const size_t COUNT = 10'000;
 
@@ -66,7 +66,7 @@ TEST_F(SmartPointerBenchmark, SmallScaleAllocations) {
 }
 
 //тестирование на большом числе объектов
-TEST_F(SmartPointerBenchmark, LargeScaleAllocations) {
+TEST_F(UniqPtr, LargeScaleAllocations) {
     std::cout << "-------------     More Object Test     -------------\n";
     const size_t COUNT = 10'000'000;
 

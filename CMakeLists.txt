@@ -1,10 +1,11 @@
 cmake_minimum_required(VERSION 3.20)
 project(mephi_lab_smrt_ptr)
 
-set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address,undefined -g")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -g -O0")
+#set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=address")
 
 include(FetchContent)
 FetchContent_Declare(
@@ -26,9 +27,14 @@ add_executable(mephi_lab_smrt_ptr
 
 enable_testing()
 add_executable(run_tests
-        tests/shared_ptr_test.cpp
+        tests/shared_ptr_basic_test.cpp
+        tests/shared_ptr_poly_test.cpp
+        tests/weak_ptr_test.cpp
+        tests/bench_small_test.cpp
+        tests/bench_large_test.cpp
+        tests/bench_copy_test.cpp
         tests/uniq_ptr_test.cpp
-        tests/common.cpp
+        tests/bench_large_test.cpp
 )
 target_link_libraries(run_tests PRIVATE GTest::gtest GTest::gtest_main)
 

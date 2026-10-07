@@ -80,7 +80,10 @@ public:
     }
 
     ~shared_ptr() {
-        if (block_) block_->release_strong();
+        if (block_) {
+            block_->release_strong();
+        }
+
     }
 
     T& operator*() const {

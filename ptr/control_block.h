@@ -60,3 +60,5 @@ struct regular_control_block : public base_control_block {
         delete this;
     }
 };
+
+//замыкание
